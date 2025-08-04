@@ -12,6 +12,13 @@ val keystoreProperties = Properties()
 val keystorePropertiesFile = rootProject.file("key.properties")
 if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(FileInputStream(keystorePropertiesFile))
+    println("🔑 Keystore properties loaded:")
+    println("  storeFile: ${keystoreProperties.getProperty("storeFile")}")
+    println("  keyAlias: ${keystoreProperties.getProperty("keyAlias")}")
+    println("  storePassword: ${if (keystoreProperties.getProperty("storePassword") != null) "✓" else "✗"}")
+    println("  keyPassword: ${if (keystoreProperties.getProperty("keyPassword") != null) "✓" else "✗"}")
+} else {
+    println("❌ key.properties file not found!")
 }
 
 android {
@@ -30,10 +37,25 @@ android {
 
     signingConfigs {
         create("release") {
-            keyAlias = keystoreProperties.getProperty("keyAlias")
-            keyPassword = keystoreProperties.getProperty("keyPassword")
-            storeFile = keystoreProperties.getProperty("storeFile")?.let { file(it) }
-            storePassword = keystoreProperties.getProperty("storePassword")
+            val storeFileProperty = keystoreProperties.getProperty("storeFile")
+            val keyAliasProperty = keystoreProperties.getProperty("keyAlias")
+            val keyPasswordProperty = keystoreProperties.getProperty("keyPassword")
+            val storePasswordProperty = keystoreProperties.getProperty("storePassword")
+            
+            println("🔧 Setting up signing config:")
+            println("  storeFile: $storeFileProperty")
+            println("  keyAlias: $keyAliasProperty")
+            
+            if (storeFileProperty != null && keyAliasProperty != null && 
+                keyPasswordProperty != null && storePasswordProperty != null) {
+                keyAlias = keyAliasProperty
+                keyPassword = keyPasswordProperty
+                storeFile = file(storeFileProperty)
+                storePassword = storePasswordProperty
+                println("✅ Signing config set successfully!")
+            } else {
+                println("❌ Some signing properties are null!")
+            }
         }
     }
 
